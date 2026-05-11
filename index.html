@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GrabTrack" />
+  <title>GrabTrack</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0f0f0;
+      --text2: #a0a0a0;
+      --text3: #606060;
+      --green: #4ade80;
+      --green-dim: rgba(74,222,128,0.12);
+      --red: #f87171;
+      --red-dim: rgba(248,113,113,0.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251,191,36,0.12);
+      --accent: #4ade80;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      padding: 52px 20px 20px;
+      background: linear-gradient(180deg, #1a1a1a 0%, transparent 100%);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; }
+    .app-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .app-name span { color: var(--green); }
+    .header-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 16px 20px 0;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .tab.active {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Pages */
+    .page { display: none; padding: 16px 20px; }
+    .page.active { display: block; }
+
+    /* Metric cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .metric-card.full { grid-column: 1 / -1; }
+    .metric-card.green-card { background: var(--green-dim); border-color: rgba(74,222,128,0.25); }
+    .mc-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .mc-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -1px; }
+    .mc-value.green { color: var(--green); }
+    .mc-value.amber { color: var(--amber); }
+    .mc-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+    /* Section title */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text3);
+      margin: 0 0 12px;
+    }
+
+    /* Form */
+    .form-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 11px; color: var(--text2); }
+    .form-group input {
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus { border-color: var(--green); }
+    .form-group input::placeholder { color: var(--text3); }
+    .net-preview {
+      background: var(--green-dim);
+      border: 0.5px solid rgba(74,222,128,0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .net-preview span { color: var(--green); font-weight: 700; font-size: 18px; }
+    .add-btn {
+      width: 100%;
+      background: var(--green);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f0f0f;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .add-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+    /* Log list */
+    .log-empty {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text3);
+      font-size: 14px;
+    }
+    .log-item {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .li-left { flex: 1; }
+    .li-date { font-size: 12px; color: var(--text3); margin-bottom: 3px; }
+    .li-note { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+    .li-details { font-size: 11px; color: var(--text3); }
+    .li-right { text-align: right; }
+    .li-gross { font-size: 12px; color: var(--text3); }
+    .li-net { font-size: 18px; font-weight: 700; color: var(--green); }
+    .del-btn {
+      background: none;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text3);
+      margin-left: 10px;
+      flex-shrink: 0;
+      font-size: 16px;
+      transition: all 0.15s;
+    }
+    .del-btn:active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+    /* Chart area */
+    .chart-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .chart-title { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+
+    /* Export */
+    .export-btn {
+      width: 100%;
+      background: var(--surface);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 10px;
+      transition: background 0.15s;
+    }
+    .export-btn:active { background: var(--surface2); }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      padding: 8px 0 20px;
+      z-index: 20;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+    .nav-icon { font-size: 22px; color: var(--text3); transition: color 0.15s; }
+    .nav-label { font-size: 10px; color: var(--text3); transition: color 0.15s; }
+    .nav-item.active .nav-icon,
+    .nav-item.active .nav-label { color: var(--green); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: var(--text);
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Install banner */
+    .install-banner {
+      background: var(--amber-dim);
+      border: 0.5px solid rgba(251,191,36,0.25);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--amber);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .install-banner.show { display: flex; }
+    .install-now {
+      background: var(--amber);
+      color: #0f0f0f;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-name">Grab<span>Track</span></div>
+      <div class="header-date" id="header-date"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Page: Dashboard -->
+<div class="page active" id="page-home">
+  <div style="height:16px;"></div>
+  <div class="install-banner" id="install-banner">
+    <span>📲 Add to home screen for app experience!</span>
+    <button class="install-now" id="install-btn">Install</button>
+  </div>
+
+  <p class="section-title">This month</p>
+  <div class="metrics-grid">
+    <div class="metric-card green-card">
+      <div class="mc-label">Net earnings</div>
+      <div class="mc-value green" id="d-net">RM 0</div>
+      <div class="mc-sub" id="d-sessions">0 sessions</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Gross earned</div>
+      <div class="mc-value" id="d-gross">RM 0</div>
+      <div class="mc-sub" id="d-fuel">RM 0 fuel</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Avg per session</div>
+      <div class="mc-value amber" id="d-avg">RM 0</div>
+      <div class="mc-sub">net average</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Best day</div>
+      <div class="mc-value green" id="d-best">RM 0</div>
+      <div class="mc-sub" id="d-best-date">—</div>
+    </div>
+    <div class="metric-card full">
+      <div class="mc-label">Avg RM per KM</div>
+      <div class="mc-value" id="d-rmkm">— RM/km</div>
+      <div class="mc-sub">target: above RM 0.40/km</div>
+    </div>
+  </div>
+
+  <p class="section-title">Net earnings — last 7 sessions</p>
+  <div class="chart-card">
+    <div style="position: relative; width: 100%; height: 160px;">
+      <canvas id="miniChart" role="img" aria-label="Net earnings per session bar chart">Net earnings per session</canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Page: Log -->
+<div class="page" id="page-log">
+  <div style="height:16px;"></div>
+  <p class="section-title">New session</p>
+  <div class="form-card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date" />
+      </div>
+      <div class="form-group">
+        <label>Gross (RM)</label>
+        <input type="number" id="f-gross" placeholder="84.00" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="form-group">
+        <label>Fuel spent (RM)</label>
+        <input type="number" id="f-fuel" placeholder="25.00" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="form-group">
+        <label>KM driven</label>
+        <input type="number" id="f-km" placeholder="220" step="1" inputmode="numeric" />
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Note (optional)</label>
+      <input type="text" id="f-note" placeholder="e.g. peak hours, friday night" />
+    </div>
+    <div class="net-preview" id="net-preview">
+      Net profit: <span id="preview-net">RM 0.00</span>
+    </div>
+    <button class="add-btn" onclick="addSession()">
+      + Add Session
+    </button>
+  </div>
+
+  <p class="section-title">History</p>
+  <div id="log-list"></div>
+</div>
+
+<!-- Page: Stats -->
+<div class="page" id="page-stats">
+  <div style="height:16px;"></div>
+  <p class="section-title">All time</p>
+  <div class="metrics-grid">
+    <div class="metric-card green-card">
+      <div class="mc-label">Total net</div>
+      <div class="mc-value green" id="s-net">RM 0</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Total gross</div>
+      <div class="mc-value" id="s-gross">RM 0</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Total sessions</div>
+      <div class="mc-value" id="s-sessions">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Total KM</div>
+      <div class="mc-value" id="s-km">0</div>
+    </div>
+    <div class="metric-card full">
+      <div class="mc-label">Total fuel cost</div>
+      <div class="mc-value" id="s-fuel">RM 0</div>
+      <div class="mc-sub">total spent on fuel across all sessions</div>
+    </div>
+  </div>
+
+  <p class="section-title">Net earnings trend</p>
+  <div class="chart-card">
+    <div class="chart-title">All sessions (chronological)</div>
+    <div style="position: relative; width: 100%; height: 200px;">
+      <canvas id="fullChart" role="img" aria-label="Net earnings trend line chart">Net earnings trend</canvas>
+    </div>
+  </div>
+
+  <p class="section-title">Export</p>
+  <button class="export-btn" onclick="exportCSV()">📥 Export to CSV</button>
+  <button class="export-btn" onclick="clearAll()" style="color: var(--red); border-color: rgba(248,113,113,0.3);">🗑 Clear all data</button>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="switchPage('home')">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label">Home</div>
+  </div>
+  <div class="nav-item" id="nav-log" onclick="switchPage('log')">
+    <div class="nav-icon">➕</div>
+    <div class="nav-label">Log</div>
+  </div>
+  <div class="nav-item" id="nav-stats" onclick="switchPage('stats')">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">Stats</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let sessions = JSON.parse(localStorage.getItem('grabtrack_v1') || '[]');
+let miniChart, fullChart;
+let deferredPrompt = null;
+
+// PWA install
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('install-banner').classList.remove('show');
+    showToast('App installed! 🎉');
+  }
+  deferredPrompt = null;
+});
+
+// Date
+const now = new Date();
+document.getElementById('header-date').textContent = now.toLocaleDateString('en-MY', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+document.getElementById('f-date').value = now.toISOString().slice(0,10);
+
+// Live net preview
+['f-gross','f-fuel'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+function updatePreview() {
+  const g = parseFloat(document.getElementById('f-gross').value) || 0;
+  const f = parseFloat(document.getElementById('f-fuel').value) || 0;
+  document.getElementById('preview-net').textContent = 'RM ' + (g - f).toFixed(2);
+}
+
+function save() { localStorage.setItem('grabtrack_v1', JSON.stringify(sessions)); }
+function fmt(n) { return 'RM ' + Number(n).toFixed(2); }
+function fmtShort(n) { return Number(n).toFixed(0); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'home') renderDashboard();
+  if (name === 'stats') renderStats();
+  if (name === 'log') renderLog();
+}
+
+function addSession() {
+  const date = document.getElementById('f-date').value;
+  const gross = parseFloat(document.getElementById('f-gross').value);
+  const fuel = parseFloat(document.getElementById('f-fuel').value) || 0;
+  const km = parseFloat(document.getElementById('f-km').value) || 0;
+  const note = document.getElementById('f-note').value.trim();
+  if (!date || isNaN(gross) || gross <= 0) { showToast('⚠️ Enter date & gross amount'); return; }
+  sessions.push({ id: Date.now(), date, gross, fuel, km, net: gross - fuel, note });
+  save();
+  document.getElementById('f-gross').value = '';
+  document.getElementById('f-fuel').value = '';
+  document.getElementById('f-km').value = '';
+  document.getElementById('f-note').value = '';
+  updatePreview();
+  renderLog();
+  showToast('Session logged! 💰');
+}
+
+function deleteSession(id) {
+  sessions = sessions.filter(s => s.id !== id);
+  save();
+  renderLog();
+  renderDashboard();
+  showToast('Deleted');
+}
+
+function renderLog() {
+  const el = document.getElementById('log-list');
+  const sorted = [...sessions].sort((a,b) => new Date(b.date) - new Date(a.date));
+  if (!sorted.length) { el.innerHTML = '<div class="log-empty">No sessions yet.<br>Log your first session above! 🚗</div>'; return; }
+  el.innerHTML = sorted.map(s => {
+    const rmkm = s.km > 0 ? (s.net / s.km).toFixed(3) + ' RM/km' : '—';
+    return `<div class="log-item">
+      <div class="li-left">
+        <div class="li-date">${s.date}</div>
+        <div class="li-note">${s.note || 'No note'}</div>
+        <div class="li-details">Fuel: RM${s.fuel.toFixed(2)} · KM: ${s.km || '—'} · ${rmkm}</div>
+      </div>
+      <div class="li-right">
+        <div class="li-gross">RM${s.gross.toFixed(2)}</div>
+        <div class="li-net">RM${s.net.toFixed(2)}</div>
+      </div>
+      <button class="del-btn" onclick="deleteSession(${s.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderDashboard() {
+  const thisMonth = now.toISOString().slice(0,7);
+  const monthly = sessions.filter(s => s.date.startsWith(thisMonth));
+  const totalNet = monthly.reduce((a,s) => a + s.net, 0);
+  const totalGross = monthly.reduce((a,s) => a + s.gross, 0);
+  const totalFuel = monthly.reduce((a,s) => a + s.fuel, 0);
+  const totalKm = monthly.reduce((a,s) => a + s.km, 0);
+  const avg = monthly.length ? totalNet / monthly.length : 0;
+  document.getElementById('d-net').textContent = fmt(totalNet);
+  document.getElementById('d-gross').textContent = fmt(totalGross);
+  document.getElementById('d-fuel').textContent = fmt(totalFuel) + ' fuel';
+  document.getElementById('d-sessions').textContent = monthly.length + ' session' + (monthly.length !== 1 ? 's' : '');
+  document.getElementById('d-avg').textContent = fmt(avg);
+  if (totalKm > 0) {
+    document.getElementById('d-rmkm').textContent = (totalNet / totalKm).toFixed(3) + ' RM/km';
+  }
+  const best = monthly.reduce((a,s) => s.net > a.net ? s : a, { net: 0, date: '—' });
+  document.getElementById('d-best').textContent = fmt(best.net);
+  document.getElementById('d-best-date').textContent = best.date === '—' ? '—' : best.date;
+
+  const last7 = [...sessions].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-7);
+  const labels = last7.map(s => s.date.slice(5));
+  const nets = last7.map(s => parseFloat(s.net.toFixed(2)));
+  if (miniChart) miniChart.destroy();
+  miniChart = new Chart(document.getElementById('miniChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ data: nets, backgroundColor: nets.map(n => n >= 0 ? 'rgba(74,222,128,0.7)' : 'rgba(248,113,113,0.7)'), borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { size: 10 }, color: '#606060' }, grid: { display: false } },
+        y: { ticks: { font: { size: 10 }, color: '#606060', callback: v => 'RM' + v }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function renderStats() {
+  const totalNet = sessions.reduce((a,s) => a + s.net, 0);
+  const totalGross = sessions.reduce((a,s) => a + s.gross, 0);
+  const totalFuel = sessions.reduce((a,s) => a + s.fuel, 0);
+  const totalKm = sessions.reduce((a,s) => a + s.km, 0);
+  document.getElementById('s-net').textContent = fmt(totalNet);
+  document.getElementById('s-gross').textContent = fmt(totalGross);
+  document.getElementById('s-sessions').textContent = sessions.length;
+  document.getElementById('s-km').textContent = totalKm.toFixed(0) + ' km';
+  document.getElementById('s-fuel').textContent = fmt(totalFuel);
+
+  const sorted = [...sessions].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const labels = sorted.map(s => s.date.slice(5));
+  const nets = sorted.map(s => parseFloat(s.net.toFixed(2)));
+  if (fullChart) fullChart.destroy();
+  fullChart = new Chart(document.getElementById('fullChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: nets,
+        borderColor: '#4ade80',
+        backgroundColor: 'rgba(74,222,128,0.08)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: '#4ade80',
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { size: 10 }, color: '#606060', autoSkip: true }, grid: { display: false } },
+        y: { ticks: { font: { size: 10 }, color: '#606060', callback: v => 'RM' + v }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function exportCSV() {
+  if (!sessions.length) { showToast('No data to export'); return; }
+  const header = 'Date,Gross (RM),Fuel (RM),KM,Net (RM),RM/KM,Note';
+  const rows = sessions.map(s => {
+    const rmkm = s.km > 0 ? (s.net / s.km).toFixed(3) : '';
+    return [s.date, s.gross.toFixed(2), s.fuel.toFixed(2), s.km, s.net.toFixed(2), rmkm, s.note].join(',');
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'grabtrack_export.csv';
+  a.click();
+  showToast('CSV exported! 📥');
+}
+
+function clearAll() {
+  if (confirm('Clear all session data? This cannot be undone.')) {
+    sessions = [];
+    save();
+    renderDashboard();
+    renderLog();
+    renderStats();
+    showToast('All data cleared');
+  }
+}
+
+renderDashboard();
+renderLog();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
